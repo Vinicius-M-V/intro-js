@@ -1,102 +1,58 @@
 const form = document.querySelector("#formMensagem");
-const input = document.querySelector("#mensagem");
-const erro = document.querySelector("#erro");
-const listaMensagens = document.querySelector("#lista");
+const inputTarefa = document.querySelector("#mensagem");
+const listaUl = document.querySelector("#listaTarefas");
+const mensagemErro = document.querySelector("#erro");
 
-//"Banco de dados" em memória (array)
-let mensagens = [];
+let tarefas = [];
 
-let editandoIndex = null;
+function renderizarTarefas() {
+    listaUl.innerHTML = "";
 
-function validarTexto(texto) {
-  const txt = texto.trim();
+    tarefas.forEach((tarefa, index) => {
+        const li = document.createElement("li");
 
-  if (txt === "") {
-    return "Digite algo antes de enviar";
-  }
+        const spanTexto = document.createElement("span");
+        spanTexto.textContent = tarefa;
+        li.appendChild(spanTexto);
 
-  if (txt.length < 3) {
-    return "Mínimo de 3 caracteres";
-  }
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.onclick = () => editarTarefa(index);
+        li.appendChild(btnEditar);
 
-  return "";
+        const btnExcluir = document.createElement("button");
+        btnExcluir.textContent = "Excluir";
+        btnExcluir.onclick = () => excluirTarefa(index);
+        li.appendChild(btnExcluir);
+
+        listaUl.appendChild(li);    
+    });
 }
 
-//Renderizando/mostrando a lista na tela
-function render() {
-  listaMensagens.innerHTML = "";
-
-  //<li> para cada mensagem
-  for (let i = 0; i < mensagens.length; i++) {
-    const li = document.createElement("li");
-
-    const span = document.createElement("span");
-    span.textContent = mensagens[i];
-
-    span.addEventListener("click", () => {
-      input.value = mensagens[indexAtual];
-      input.focus();
-      editandoIndex = indexAtual;
-
-      erro.textContent =
-        "Editando item " + (indexAtual + 1) + " (envie para salvar)";
-    });
-
-    const btnExcluir = document.createElement("button");
-    btnExcluir.type = "button";
-    btnExcluir.textContent = "Excluir";
-
-    const indexAtual = i;
-
-    btnExcluir.addEventListener("click", () => {
-      mensagens.splice(indexAtual, 1);
-      console.log(indexAtual);
-      render();
-    });
-
-    li.append(span, " ", btnExcluir);
-    listaMensagens.append(li);
-  }
+function excluirTarefa(index) {
+    tarefas.splice(index, 1);
+    renderizarTarefas();
 }
 
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
+function editarTarefa(index) {
+    const novoTexto = prompt("Editar", tarefas[index]);
+    if (novoTexto !== null && novoTexto.trim !== "") {
+        tarefas[index ] = novoTexto.trim();
+        renderizarTarefas();
+     }
+}   
 
-  const textoDigitado = input.value;
-  const mensagemErro = validarTexto(textoDigitado);
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
 
-  if (mensagemErro !== "") {
-    erro.textContent = mensagemErro;
-    return;
-  }
+    const textoTarefa = inputTarefa.value.trim();
 
-  erro.textContent = "";
-
-  const textoFinal = textoDigitado.trim();
-
-  if (editandoIndex !== null) {
-    mensagens[editandoIndex] = textoFinal;
-    editandoIndex = null;
-  } else {
-    mensagens.push(textoDigitado.trim());
-  }
-
-  render();
-
-  input.value = "";
-  input.focus();
+    if (textoTarefa === "") {
+        mensagemErro.textContent = "Erro, digite algo para iniciar";
+    } else {
+        mensagemErro.textContext = "";
+        tarefas.push(textoTarefa)
+        inputTarefa.value = "";
+        renderizarTarefas();
+    }
 });
-
-//exemplo de função
-function falar() {
-  alert("Olá! Eu sou um botão com Javascript");
-  console.log("O botão foi clicado");
-  console.log("Meu time me estressa toda semana");
-}
-
-//ligando botão com a função
-const botao = document.getElementById("btnFala");
-botao.addEventListener("click", falar);
-
-//const botao2 = document.getElementById("btnFala2");
-//botao2.addEventListener("click", falar);
